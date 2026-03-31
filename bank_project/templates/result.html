@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Suspicious Accounts Report</title>
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f7f4ff;
+  padding: 30px;
+}
+h2 {
+  text-align: center;
+  color: #4a148c;
+}
+table.data {
+  border-collapse: collapse;
+  width: 100%;
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+th {
+  background-color: #6a1b9a;
+  color: white;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+</style>
+</head>
+<body>
+  <h2>🔍 Suspicious Accounts Report</h2>
+  {% for table in tables %}
+    {{ table|safe }}
+  {% endfor %}
+</body>
+</html>

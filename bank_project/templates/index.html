@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AnshPunji | Bank Layering Detector</title>
+<style>
+/* ---------- Base ---------- */
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: radial-gradient(circle at 20% 20%, #ece5ff 0%, #f8f7ff 90%);
+  color: #222;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Header ---------- */
+.header { 
+  text-align: center; 
+  padding-top: 20px; 
+  position: relative;
+}
+.header img {
+  position: absolute;
+  top: 12px;
+  left: 20px;
+  width: 72px;
+  opacity: 0.95;
+}
+.header h1 {
+  font-size: 58px;
+  font-weight: 900;
+  background: linear-gradient(90deg,#6a1b9a,#9c27b0,#ce93d8,#9c27b0);
+  background-size: 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientFlow 6s ease infinite;
+  letter-spacing: 3px;
+  text-shadow: 0 0 15px rgba(156,39,176,0.25);
+  margin: 0;
+}
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.header h3{
+  margin-top: 6px;
+  color: #5e35b1;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.8px;
+}
+
+/* ---------- Navbar ---------- */
+nav {
+  margin-top: 14px;
+  display:flex;
+  justify-content:center;
+  gap:36px;
+  background: rgba(94,53,177,0.85);
+  padding:10px 0;
+  width:90%;
+  margin-left:auto;
+  margin-right:auto;
+  border-radius:10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+nav a{
+  position: relative;
+  color:#fff;
+  text-decoration:none;
+  padding:8px 18px;
+  border-radius:20px;
+  font-size:16px;
+  transition: all .25s ease;
+}
+nav a::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:3px;
+  width:0;height:3px;
+  background: linear-gradient(90deg,#fff,#ce93d8,#fff);
+  transform:translateX(-50%);
+  border-radius:2px;
+  transition: all .25s ease;
+  opacity:0;
+}
+nav a:hover::after{
+  width:60%;
+  opacity:1;
+  box-shadow: 0 0 8px rgba(255,255,255,0.6);
+}
+nav a:hover{ transform:translateY(-2px); }
+
+/* ---------- Login Section (glowing background kept) ---------- */
+#login-section {
+  max-width: 900px;
+  margin: 48px auto;
+  text-align: center;
+  padding: 36px 28px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.36), rgba(255,255,255,0.12));
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.35);
+  box-shadow: 0 10px 30px rgba(94,53,177,0.15);
+  position: relative;
+  overflow: visible;
+}
+
+/* glowing border behind box (soft) */
+#login-section::before{
+  content:"";
+  position:absolute;
+  top:-8px; left:-8px; right:-8px; bottom:-8px;
+  border-radius:22px;
+  background: linear-gradient(45deg, rgba(156,39,176,0.18), rgba(233,30,99,0.06));
+  filter: blur(12px);
+  z-index:-1;
+  opacity:0.9;
+  animation: pulseGlow 3.2s ease-in-out infinite;
+}
+@keyframes pulseGlow{
+  0%{opacity:0.6; transform: scale(1);}
+  50%{opacity:1; transform: scale(1.01);}
+  100%{opacity:0.6; transform: scale(1);}
+}
+
+/* inputs + buttons */
+#login-section input[type="text"],
+#login-section input[type="password"]{
+  width: 78%;
+  max-width:420px;
+  padding:10px 12px;
+  margin:10px 0;
+  border-radius:8px;
+  border:1px solid #d0cfe8;
+  font-size:15px;
+  outline:none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.btn {
+  background: linear-gradient(90deg,#8e24aa,#6a1b9a);
+  color:white;
+  border:none;
+  padding:10px 20px;
+  border-radius:26px;
+  cursor:pointer;
+  font-weight:700;
+  margin:14px auto;
+  display:inline-block;
+  transition: all .35s ease;
+  position:relative;
+  overflow:hidden;
+}
+.btn::after{
+  content:"";
+  position:absolute; top:0; left:-70%;
+  width:40%; height:100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-25deg);
+  transition: .8s;
+}
+.btn:hover::after{ left:130%; }
+.btn:hover{ transform: scale(1.03); box-shadow: 0 8px 22px rgba(138,43,226,0.24); }
+
+/* drop zone */
+#drop-zone{
+  width:78%;
+  max-width:500px;
+  margin:16px auto;
+  padding:20px;
+  border-radius:12px;
+  border:2px dashed rgba(94,53,177,0.35);
+  background: rgba(255,255,255,0.55);
+  color:#4a148c;
+  cursor:pointer;
+  transition: box-shadow .25s ease, background .25s ease;
+}
+#drop-zone.dragover{ background: rgba(94,53,177,0.08); box-shadow: 0 10px 30px rgba(94,53,177,0.08); }
+
+/* ---------- How It Works / Tiles ---------- */
+#how-it-works { max-width:1100px; margin:60px auto; padding:0 20px; text-align:center; }
+#how-it-works h2{ color: #4a148c; font-size:30px; margin-bottom:18px; }
+.tiles { display:flex; flex-wrap:wrap; gap:22px; justify-content:center; }
+.tile {
+  flex:1 1 300px;
+  max-width:340px;
+  background: rgba(255,255,255,0.6);
+  border-radius:14px;
+  padding:22px;
+  box-shadow: 0 10px 30px rgba(94,53,177,0.08);
+  transition: transform .35s ease, box-shadow .35s ease;
+  transform-origin:center;
+}
+.tile:hover{ transform: translateY(-8px); box-shadow: 0 18px 40px rgba(94,53,177,0.12); }
+.tile h3{ color:#5e35b1; margin-bottom:8px; }
+.tile p{ color:#333; line-height:1.5; }
+
+/* ---------- Results Inline ---------- */
+#analysis-results{
+  max-width:1100px;
+  margin:30px auto;
+  padding:20px;
+}
+#analysis-results .table-wrap{
+  width:100%;
+  overflow:auto;
+  background:#fff;
+  border-radius:10px;
+  padding:8px;
+  box-shadow: 0 8px 26px rgba(0,0,0,0.06);
+}
+
+/* network image */
+#network-img{
+  max-width:100%;
+  margin-top:14px;
+  border-radius:8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* ---------- Loading overlay ---------- */
+#loading-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(10,6,20,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.loader {
+  width:120px;
+  height:120px;
+  border-radius:12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.15);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+}
+.spinner {
+  width:44px; height:44px;
+  border-radius:50%;
+  border:5px solid rgba(255,255,255,0.08);
+  border-top-color: #b388ff;
+  animation: spin 1s linear infinite;
+  margin-bottom:10px;
+}
+@keyframes spin { to{ transform: rotate(360deg); } }
+
+/* responsive tweaks */
+@media (max-width:800px){
+  .header h1 { font-size:36px; }
+  nav { gap:12px; width:95%; padding:8px 0; }
+  #login-section input { width:92%; }
+  .tile { max-width:92%; }
+  #drop-zone { width:92%; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div class="loader">
+    <div class="spinner"></div>
+    <div style="color:#fff;font-weight:700;">Analyzing...</div>
+    <div style="color:#ddd;font-size:13px;margin-top:6px;">Please wait — this may take a few seconds</div>
+  </div>
+</div>
+
+<div class="header">
+  <img src="/static/logo.png" alt="Logo">
+  <h1>AnshPunji</h1>
+  <h3>AI-Driven Bank Layering Detection System</h3>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#login-section">Analyze</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#analysis-results">Results</a>
+    <a href="#about">About</a>
+  </nav>
+</div>
+
+<section id="home" style="text-align:center;margin:36px auto;">
+  <h2>Welcome to the Bank Layering Detection System</h2>
+</section>
+
+<!-- LOGIN / UPLOAD -->
+<section id="login-section" aria-label="login">
+  <h3>Login as Bank User</h3>
+
+  <input id="userid" type="text" placeholder="User ID (e.g. sbi_user)" />
+  <input id="password" type="password" placeholder="Password" />
+
+  <button class="btn" id="login-btn" onclick="onLoginClick()">Login & Analyze</button>
+  <div id="login-msg" style="height:20px;margin-top:6px;color:#5e35b1;font-weight:600"></div>
+
+  <hr style="margin:18px 0;border-color:rgba(0,0,0,0.06)" />
+
+  <h3>Or Upload Your Own CSV</h3>
+  <div id="drop-zone">📂 Drag & Drop CSV file here or click to select</div>
+  <input id="directUpload" type="file" style="display:none;" accept=".csv" />
+  <button class="btn" onclick="onUploadClick()">Upload & Analyze</button>
+  <div id="direct-msg" style="height:20px;margin-top:6px;color:#444;"></div>
+
+  <!-- result panel (small confirmation) -->
+  <div id="result-note" style="margin-top:18px;display:none;color:green;font-weight:700;">Analysis in progress... results will appear below.</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <h2>💡 How AnshPunji Works</h2>
+  <div class="tiles">
+    <div class="tile">
+      <h3>1️⃣ Data Ingestion</h3>
+      <p>Reads transactional CSV from bank dataset or uploaded file and prepares a normalized edge list for analysis.</p>
+    </div>
+    <div class="tile">
+      <h3>2️⃣ Smart Pattern Detection</h3>
+      <p>Detects directed cycles and suspicious bursts using graph traversal and feature scoring.</p>
+    </div>
+    <div class="tile">
+      <h3>3️⃣ Visualization & Reporting</h3>
+      <p>Produces per-account risk scores, a suspicious-accounts CSV, and a network graph — all shown inline for quick review.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS (will be populated inline) -->
+<section id="analysis-results" aria-live="polite" style="display:none;">
+  <h2 style="color:#4a148c;margin-bottom:10px;">🔍 Analysis Results</h2>
+
+  <div id="analysis-meta" style="margin-bottom:10px;color:#444;"></div>
+
+  <div class="table-wrap" id="table-container"></div>
+
+  <div id="graph-container" style="margin-top:18px;">
+    <img id="network-img" src="" alt="Network Graph" style="display:none;">
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" style="max-width:740px;margin:36px auto;text-align:center;">
+  <h2>About AnshPunji</h2>
+  <p><strong>Team 404 Found</strong> — GLA University, Mathura. An AI-assisted tool to detect layering and suspicious money-trail patterns in transaction data for better AML support.</p>
+</section>
+
+<footer style="text-align:center;padding:20px;color:#666;">© 2025 Team 404 Found | GLA University, Mathura</footer>
+
+<script>
+/* ---------- Utility DOM refs ---------- */
+const overlay = document.getElementById("loading-overlay");
+const dropZone = document.getElementById("drop-zone");
+const fileInput = document.getElementById("directUpload");
+const tableContainer = document.getElementById("table-container");
+const graphImg = document.getElementById("network-img");
+const analysisSection = document.getElementById("analysis-results");
+const resultNote = document.getElementById("result-note");
+
+/* ---------- Drag & Drop ---------- */
+dropZone.addEventListener("click", () => fileInput.click());
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+dropZone.addEventListener("drop", e => {
+  e.preventDefault(); dropZone.classList.remove("dragover");
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) {
+    fileInput.files = e.dataTransfer.files;
+    dropZone.textContent = `✅ ${f.name} selected`;
+  }
+});
+
+/* ---------- Show / Hide loading ---------- */
+function showLoading(){ overlay.style.display = "flex"; }
+function hideLoading(){ overlay.style.display = "none"; }
+
+/* ---------- Display results inline ---------- */
+async function displayResultsInline(resJson){
+  // expected resJson: {status:"done", output_csv:"output/suspicious_accounts.csv", network_graph:"output/network_plot.png"}
+  if(!resJson || resJson.status!=="done") {
+    alert("Analysis failed or returned error.");
+    hideLoading();
+    return;
+  }
+
+  // show section
+  analysisSection.style.display = "block";
+  resultNote.style.display = "none";
+  // meta
+  document.getElementById("analysis-meta").textContent = "Report generated — loading table and network graph...";
+
+  // extract file names
+  const csvName = resJson.output_csv.split(/[\\/]/).pop();
+  const graphName = resJson.network_graph.split(/[\\/]/).pop();
+
+  try {
+    // fetch CSV rendering (app.py returns an HTML page with the table)
+    const r = await fetch("/get_results/" + encodeURIComponent(csvName));
+    const txt = await r.text();
+
+    // try to extract the <table ...>...</table> from response
+    const tableMatch = txt.match(/<table[\s\S]*?<\/table>/i);
+    if(tableMatch && tableMatch[0]) {
+      tableContainer.innerHTML = tableMatch[0];
+    } else {
+      // fallback: put entire response
+      tableContainer.innerHTML = "<pre style='white-space:pre-wrap;font-size:13px;color:#333;padding:12px;'>Unable to parse table from server response. Opening raw response...</pre>";
+      console.warn("No table found in CSV response; injecting full text.");
+      tableContainer.innerHTML += "<div style='font-size:12px;color:#666;margin-top:8px;'><a href='/get_results/" + encodeURIComponent(csvName) + "' target='_blank'>Open full report in new tab</a></div>";
+    }
+
+    // load graph image inline
+    graphImg.style.display = "block";
+    graphImg.src = "/get_results/" + encodeURIComponent(graphName);
+
+    // small UI polish
+    document.getElementById("analysis-meta").textContent = `Suspicious accounts shown (High+Medium). Table below is interactive. Graph displayed under table.`;
+  } catch(err){
+    console.error(err);
+    tableContainer.innerHTML = "<div style='padding:12px;color:#900;background:#fee;border-radius:8px;'>Could not load results — try downloading from the links. Check server logs.</div>";
+  } finally {
+    hideLoading();
+    // scroll to results smoothly
+    setTimeout(()=>{ document.getElementById("analysis-results").scrollIntoView({behavior:'smooth'}); }, 200);
+  }
+}
+
+/* ---------- On login click ---------- */
+async function onLoginClick(){
+  const userid = document.getElementById("userid").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if(!userid || !password){ document.getElementById("login-msg").textContent = "Enter both userid and password."; return; }
+  document.getElementById("login-msg").textContent = "";
+  showLoading();
+  resultNote.style.display = "block";
+  resultNote.textContent = "Analysis started for bank user — please wait...";
+
+  try {
+    const res = await fetch("/login", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ userid, password })
+    });
+    const data = await res.json();
+    if(data.status === "success"){
+      // call analyze with csv_path from login
+      const res2 = await fetch("/analyze", {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ csv_path: data.csv_file })
+      });
+      const data2 = await res2.json();
+      // display inline
+      await displayResultsInline(data2);
+    } else {
+      hideLoading();
+      document.getElementById("login-msg").textContent = "❌ Invalid credentials";
+      resultNote.style.display = "none";
+    }
+  } catch(e){
+    console.error(e);
+    hideLoading();
+    document.getElementById("login-msg").textContent = "Server error. Check console.";
+    resultNote.style.display = "none";
+  }
+}
+
+/* ---------- On upload click ---------- */
+async function onUploadClick(){
+  const files = fileInput.files;
+  if(!files || files.length===0){ document.getElementById("direct-msg").textContent = "Please select a CSV file."; return; }
+  const file = files[0];
+  document.getElementById("direct-msg").textContent = "";
+  showLoading();
+  resultNote.style.display = "block";
+  resultNote.textContent = "Uploading and analyzing — please wait...";
+
+  try {
+    const form = new FormData();
+    form.append("file", file);
+    const r = await fetch("/upload", { method: "POST", body: form });
+    const uploadRes = await r.json();
+    if(uploadRes.status === "uploaded"){
+      const res2 = await fetch("/analyze", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ csv_path: uploadRes.csv_path })
+      });
+      const data2 = await res2.json();
+      await displayResultsInline(data2);
+    } else {
+      hideLoading();
+      document.getElementById("direct-msg").textContent = "Upload failed.";
+      resultNote.style.display = "none";
+    }
+  } catch(e){
+    console.error(e);
+    hideLoading();
+    document.getElementById("direct-msg").textContent = "Error uploading or analyzing file.";
+    resultNote.style.display = "none";
+  }
+}
+
+/* ---------- Helper: call existing displayResults (keeps backward compatibility) ---------- */
+function displayResults(data){
+  // keep compatibility - show inline as well
+  displayResultsInline(data);
+}
+
+/* ---------- Reset ---------- */
+function reset(){
+  tableContainer.innerHTML = "";
+  graphImg.src = "";
+  graphImg.style.display = "none";
+  analysisSection.style.display = "none";
+  document.getElementById("login-msg").textContent = "";
+  document.getElementById("direct-msg").textContent = "";
+  document.getElementById("userid").value = "";
+  document.getElementById("password").value = "";
+  fileInput.value = "";
+  dropZone.textContent = "📂 Drag & Drop CSV file here or click to select";
+}
+</script>
+</body>
+</html>
